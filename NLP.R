@@ -43,6 +43,18 @@ getAnnotatedPlainTextDocument = function(doc,annotations){
 }
 
 
+
+getBarplot = function(data, text, style, names){
+  barplot(data, 
+        col = rev(brewer.pal(n = 4, name = style)), 
+        border="black", 
+        names.arg = names,
+        ylab = text
+        )
+  }
+
+
+
 getwd()
 
 raw_text <- DirSource("Speeches", encoding = "UTF-8" )
@@ -78,91 +90,63 @@ corpus = tm_map(corpus,stripWhitespace)
 
 #stemming the document
 #corpus = tm_map(corpus,stemDocument)
-#doc[[4]]$content[1]
 
 #corpus <- gsub(pattern="\\b[A-z]\\b(1)", replace =" ", corpus)
 
 ####COMPARISON CLOUD  
 
+corpus.content <-corpus$content
 
-content <-corpus$content
-
-new_corpus <- Corpus(VectorSource(content))
-
+new_corpus <- Corpus(VectorSource(corpus.content))
 
 tdm = TermDocumentMatrix(new_corpus)
-tdm
-m <- as.matrix(tdm)
-colnames(m) <- c("Pope","Putin","Queen","Trump")
 
-#comparison.cloud(m, colors=brewer.pal(6,"Dark2"), random.order=FALSE)
+tdm.matrix <- as.matrix(tdm)
+colnames(tdm.matrix) <- c("Pope","Putin","Queen","Trump")
 
 dev.new(width = 1000, height = 1000, unit = "px")
 wordcloud(new_corpus, random.order = FALSE, colors = rainbow(10))
 
-comparison.cloud(m,random.order = FALSE, max.words=60)
+dev.new(width = 1000, height = 1000, unit = "px")
+comparison.cloud(tdm.matrix,random.order = FALSE, max.words=60)
 
 
 ####Sentiment Analysis
+words <- str_split(corpus.content, pattern="\\s+")
 
-Document <- str_split(content, pattern="\\s+")
+words.positives = unlist(lapply(words, function(x){sum(!is.na(match(x,positive)))}))
+words.negatives = unlist(lapply(words, function(x){sum(!is.na(match(x,negative)))}))
 
-positives = unlist(lapply(Document, function(x){sum(!is.na(match(x,positive)))}))
-negatives = unlist(lapply(Document, function(x){sum(!is.na(match(x,negative)))}))
+words.total = unlist(lapply(words, function(x){sum(!is.na(match(x,positive)))  - sum(!is.na(match(x,negative))) } )) 
 
-total = unlist(lapply(Document, function(x){sum(!is.na(match(x,positive)))  - sum(!is.na(match(x,negative))) } )) 
+mean(words.total)
+words.total
+sd(words.total)
 
-mean(total)
-total
-sd(total)
+#Plotting the BarPlots of the Sentiment Analysis
 
+getBarplot(words.positives,"Positive words", "Greens", colnames(tdm.matrix))
 
-#Positive words
-barplot(positives, 
-        col = rev(brewer.pal(n = 4, name = "Greens")), 
-        border="black", 
-        names.arg = c("Pope", "Putin", "Queen", "Trump"), 
-        ylab = "Positive words"
-)
+getBarplot(words.negatives,"Negative words", "Reds", colnames(tdm.matrix))
 
-#Negative words
-barplot(negatives, 
-        col = rev(brewer.pal(n = 4, name = "Reds")), 
-        border="black", 
-        names.arg = c("Pope", "Putin", "Queen", "Trump"), 
-        ylab = "Negative words"
-)
+getBarplot(words.total,"Positive - Negative words", "RdBu", colnames(tdm.matrix))
 
-#Positive - Negative words
-barplot(total, 
-        col = rev(brewer.pal(n = 4, name = "RdBu")), 
-        border="black", 
-        names.arg = c("Pope", "Putin", "Queen", "Trump"), 
-        ylab = "Positive - Negative words"
-        )
 
 #Annotations
 
-annotations2 = lapply(corpus, getAnnotationsFromDocument)
+annotations = lapply(corpus, getAnnotationsFromDocument)
 
-corpus.tagged = Map(getAnnotatedPlainTextDocument, corpus, annotations2)
-#inspect(corpus.tagged[[1]])
+corpus.tagged = Map(getAnnotatedPlainTextDocument, corpus, annotations)
+corpus.taggedText = Map(getAnnotatedMergedDocument, corpus, annotations)
 
-corpus.taggedText = Map(getAnnotatedMergedDocument, corpus, annotations2)
-#inspect(corpus.taggedText[[1]])
+corpus.taggedText
 
 ###Frequency table
-
-install.packages("wesanderson")
-# Load
-library(wesanderson)
-
 
 freq=rowSums(as.matrix(tdm))
 high.freq=tail(sort(freq),n=20)
 hfp.df=as.data.frame(sort(high.freq))
 hfp.df$names <- rownames(hfp.df) 
-
 
 ggplot(hfp.df, aes(reorder(names,high.freq), high.freq,  fill = names) ) +
   geom_bar(stat="identity") + coord_flip() +
@@ -176,7 +160,6 @@ ggplot(hfp.df, aes(reorder(names,high.freq), high.freq,  fill = names) ) +
   theme(plot.margin = unit(c(1, 1, .5, .7), "cm"))+
   theme(legend.position="none")
   
-
 #Creating a wordcloud
 
 Christmas_corpus_split <- VectorSource(corpus)
