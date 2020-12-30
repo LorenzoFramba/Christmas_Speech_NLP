@@ -1,15 +1,35 @@
-require(rJava)
+if (!require(rJava)) install.packages('rJava')
+library(rJava)
 .jinit(parameters="-Xmx4g")
 # If there are more memory problems, invoke gc() after the POS tagging
-require(ggplot2)
-require(wordcloud)
-require(NLP) 
-require(openNLP) 
-require(openNLPmodels.en)
-require(tm)
-require(stringr)
-require("viridis") 
-require(color.hist)
+
+
+if (!require(ggplot2)) install.packages('ggplot2')
+library(ggplot2)
+
+if (!require(wordcloud)) install.packages('wordcloud')
+library(wordcloud)
+
+if (!require(NLP)) install.packages('NLP')
+library(NLP)
+
+if (!require(openNLP)) install.packages('openNLP')
+library(openNLP)
+
+if (!require(openNLPmodels.en)) install.packages('openNLPmodels.en')
+library(openNLPmodels.en)
+
+if (!require(tm)) install.packages('tm')
+library(tm)
+
+if (!require(stringr)) install.packages('stringr')
+library(stringr)
+
+if (!require(viridis)) install.packages('viridis')
+library(viridis)
+
+if (!require(color.hist)) install.packages('color.hist')
+library(color.hist)
 
 #getAnnotationsFromDocument returns annotations for the text document: word, sentence, part-of-speech, and Penn Treebank parse annotations.
 getAnnotationsFromDocument = function(doc){
@@ -22,8 +42,8 @@ getAnnotationsFromDocument = function(doc){
   return(y2)  
 } 
 
-#getAnnotatedMergedDocument returns the text document merged with the annotations.
 
+#getAnnotatedMergedDocument returns the text document merged with the annotations.
 getAnnotatedMergedDocument = function(doc,annotations){
   x=as.String(doc)
   y2w <- subset(annotations, type == "word")
@@ -33,7 +53,7 @@ getAnnotatedMergedDocument = function(doc,annotations){
   return(r2)  
 } 
 
-#Barplot coming 
+#Barplot 
 getBarplot = function(data, text, style, names){
   barplot(data, 
         col = rev(brewer.pal(n = 4, name = style)), 
@@ -43,18 +63,15 @@ getBarplot = function(data, text, style, names){
         )
   }
 
-
-
 getwd()
 
 raw_text <- DirSource("Speeches", encoding = "UTF-8" )
-
 positive <- scan('positive-words.txt', what='character', comment.char = ";")
 negative = scan('negative-words.txt', what='character', comment.char = ";")
 
 corpus = Corpus(raw_text)
-
 corpus
+
 #####CLEANING UP THE TEXT 
 
 ##Lowering the letters 
