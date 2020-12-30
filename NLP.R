@@ -69,7 +69,7 @@ positive <- scan('positive-words.txt', what='character', comment.char = ";")
 negative = scan('negative-words.txt', what='character', comment.char = ";")
 
 corpus = Corpus(raw_text)
-corpus
+corpusRaw = Corpus(raw_text)
 
 #####CLEANING UP THE TEXT 
 
@@ -78,14 +78,16 @@ corpus <- tm_map(corpus, content_transformer(tolower))
 
 ##removing stopwords()
 myStopwords = c(stopwords(),"donald","trump","president", "Queen", 
-                          "elizabeth", "pope", "francis", "together", 
-                            "december", "'s", "'re", "“", "”", "’s")
-corpus = tm_map(corpus,removeWords,myStopwords)
+                          "elizabeth", "pope", "francis")
 
+corpus = tm_map(corpus,removeWords,myStopwords)
 corpus = tm_map(corpus,removeWords,stopwords())
 
 #removing punctuation
 corpus = tm_map(corpus,removePunctuation)
+
+#removing spaces
+corpus = tm_map(corpus,stripWhitespace)
 
 
 #removing numbers
@@ -97,9 +99,20 @@ corpus = tm_map(corpus,stripWhitespace)
 #stemming the document
 #corpus = tm_map(corpus,stemDocument)
 
-#corpus <- gsub(pattern="\\b[A-z]\\b(1)", replace =" ", corpus)
+#showing differences 
+corpusRaw$content
+corpus$content
 
-####COMPARISON CLOUD  
+#Annotations
+
+
+annotations = lapply(corpus, getAnnotationsFromDocument)
+
+corpus.taggedText = Map(getAnnotatedMergedDocument, corpus, annotations)
+
+corpus.taggedText
+
+#CLOUDS  
 
 corpus.content <-corpus$content
 
@@ -110,14 +123,15 @@ tdm = TermDocumentMatrix(new_corpus)
 tdm.matrix <- as.matrix(tdm)
 colnames(tdm.matrix) <- c("Pope","Putin","Queen","Trump")
 
+
 dev.new(width = 1000, height = 1000, unit = "px")
-wordcloud(new_corpus, random.order = FALSE, colors = rainbow(10))
+wordcloud(new_corpus, random.order = FALSE, colors =brewer.pal(6,"Dark2"), max.words=100)
 
 dev.new(width = 1000, height = 1000, unit = "px")
 comparison.cloud(tdm.matrix,random.order = FALSE, max.words=60)
 
 
-####Sentiment Analysis
+#SENTIMENT ANALYSIS
 words <- str_split(corpus.content, pattern="\\s+")
 
 words.positives = unlist(lapply(words, function(x){sum(!is.na(match(x,positive)))}))
@@ -128,7 +142,7 @@ mean(words.total)
 words.total
 sd(words.total)
 
-#Plotting the BarPlots of the Sentiment Analysis
+#PLOTTING THE BARPLOTS of the Sentiment Analysis
 
 getBarplot(words.positives,"Positive words", "Greens", colnames(tdm.matrix))
 
@@ -137,15 +151,7 @@ getBarplot(words.negatives,"Negative words", "Reds", colnames(tdm.matrix))
 getBarplot(words.total,"Positive - Negative words", "RdBu", colnames(tdm.matrix))
 
 
-#Annotations
-
-annotations = lapply(corpus, getAnnotationsFromDocument)
-
-corpus.taggedText = Map(getAnnotatedMergedDocument, corpus, annotations)
-
-corpus.taggedText
-
-###Frequency table
+#FREQUENCY TABLE
 
 freq=rowSums(as.matrix(tdm))
 high.freq=tail(sort(freq),n=20)
@@ -163,27 +169,3 @@ ggplot(hfp.df, aes(reorder(names,high.freq), high.freq,  fill = names) ) +
   theme(axis.title.x=element_text(size=10,color="#535353",face="bold",vjust=-.5)) +
   theme(plot.margin = unit(c(1, 1, .5, .7), "cm"))+
   theme(legend.position="none")
-  
-#Creating a wordcloud
-
-Christmas_corpus_split <- VectorSource(corpus)
-Christmas_corpus_split <- VCorpus(Christmas_corpus_split)
-
-Christmas_dtm <- DocumentTermMatrix(Christmas_corpus_split) 
-
-Christmas_dtm.mx = as.matrix(Christmas_dtm)
-
-Christmas_frequency <- colSums(Christmas_dtm.mx)
-Christmas_frequency <- sort(Christmas_frequency, decreasing=TRUE)
-Christmas_frequency[1:10] # list 10 most frequent terms
-
-Christmas_wf = data.frame(term=names(Christmas_frequency),occurrences=Christmas_frequency)
-Christmas_wf <- Christmas_wf[order(-Christmas_wf$occurrences), ] 
-Christmas_wf <- Christmas_wf[1:10,] # produce a dataframe with 10 most frequent terms 
-
-Christmas_words <- names(Christmas_frequency)
-wordcloud(Christmas_words[1:50], Christmas_frequency[1:50], colors=brewer.pal(6,"Dark2"),random.order = FALSE )
-
-
-
-
