@@ -1,8 +1,6 @@
 if (!require(rJava)) install.packages('rJava')
 library(rJava)
-.jinit(parameters="-Xmx4g")
-# If there are more memory problems, invoke gc() after the POS tagging
-
+.jinit(parameters="-Xmx4g") # If there are more memory problems, invoke gc() after the POS tagging
 
 if (!require(ggplot2)) install.packages('ggplot2')
 library(ggplot2)
@@ -30,6 +28,7 @@ library(viridis)
 
 if (!require(color.hist)) install.packages('color.hist')
 library(color.hist)
+
 
 #getAnnotationsFromDocument returns annotations for the text document: word, sentence, part-of-speech, and Penn Treebank parse annotations.
 getAnnotationsFromDocument = function(doc){
