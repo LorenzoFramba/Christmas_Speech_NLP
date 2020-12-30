@@ -1,16 +1,15 @@
-library(rJava)
+require(rJava)
 .jinit(parameters="-Xmx4g")
 # If there are more memory problems, invoke gc() after the POS tagging
-library(ggplot2)
-library(wordcloud)
-library(NLP) 
-library(openNLP) 
-library(openNLPmodels.en)
-library(tm)
-library(stringr)
-install.packages("viridis")  # Install
-library("viridis") 
-library(color.hist)
+require(ggplot2)
+require(wordcloud)
+require(NLP) 
+require(openNLP) 
+require(openNLPmodels.en)
+require(tm)
+require(stringr)
+require("viridis") 
+require(color.hist)
 
 #getAnnotationsFromDocument returns annotations for the text document: word, sentence, part-of-speech, and Penn Treebank parse annotations.
 getAnnotationsFromDocument = function(doc){
@@ -34,16 +33,7 @@ getAnnotatedMergedDocument = function(doc,annotations){
   return(r2)  
 } 
 
-#getAnnotatedPlainTextDocument returns the text document along with its annotations in an AnnotatedPlainTextDocument.
-
-getAnnotatedPlainTextDocument = function(doc,annotations){
-  x=as.String(doc)
-  a = AnnotatedPlainTextDocument(x,annotations)
-  return(a)  
-}
-
-
-
+#Barplot coming 
 getBarplot = function(data, text, style, names){
   barplot(data, 
         col = rev(brewer.pal(n = 4, name = style)), 
@@ -116,7 +106,6 @@ words <- str_split(corpus.content, pattern="\\s+")
 
 words.positives = unlist(lapply(words, function(x){sum(!is.na(match(x,positive)))}))
 words.negatives = unlist(lapply(words, function(x){sum(!is.na(match(x,negative)))}))
-
 words.total = unlist(lapply(words, function(x){sum(!is.na(match(x,positive)))  - sum(!is.na(match(x,negative))) } )) 
 
 mean(words.total)
@@ -136,7 +125,6 @@ getBarplot(words.total,"Positive - Negative words", "RdBu", colnames(tdm.matrix)
 
 annotations = lapply(corpus, getAnnotationsFromDocument)
 
-corpus.tagged = Map(getAnnotatedPlainTextDocument, corpus, annotations)
 corpus.taggedText = Map(getAnnotatedMergedDocument, corpus, annotations)
 
 corpus.taggedText
