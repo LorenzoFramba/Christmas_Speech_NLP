@@ -26,9 +26,6 @@ library(stringr)
 if (!require(viridis)) install.packages('viridis')
 library(viridis)
 
-if (!require(color.hist)) install.packages('color.hist')
-library(color.hist)
-
 
 #getAnnotationsFromDocument returns annotations for the text document: word, sentence, part-of-speech, and Penn Treebank parse annotations.
 getAnnotationsFromDocument = function(doc){
@@ -40,7 +37,6 @@ getAnnotationsFromDocument = function(doc){
   y2 <- NLP::annotate(x, pos_tag_annotator, y1)
   return(y2)  
 } 
-
 
 #getAnnotatedMergedDocument returns the text document merged with the annotations.
 getAnnotatedMergedDocument = function(doc,annotations){
@@ -78,7 +74,7 @@ corpus <- tm_map(corpus, content_transformer(tolower))
 
 ##removing stopwords()
 myStopwords = c(stopwords(),"donald","trump","president", "Queen", 
-                          "elizabeth", "pope", "francis")
+                          "elizabeth", "pope", "francis", "melania" )
 
 corpus = tm_map(corpus,removeWords,myStopwords)
 corpus = tm_map(corpus,removeWords,stopwords())
@@ -124,10 +120,10 @@ tdm.matrix <- as.matrix(tdm)
 colnames(tdm.matrix) <- c("Pope","Putin","Queen","Trump")
 
 
-dev.new(width = 1000, height = 1000, unit = "px")
+#dev.new(width = 1000, height = 1000, unit = "px")
 wordcloud(new_corpus, random.order = FALSE, colors =brewer.pal(6,"Dark2"), max.words=100)
 
-dev.new(width = 1000, height = 1000, unit = "px")
+#dev.new(width = 1000, height = 1000, unit = "px")
 comparison.cloud(tdm.matrix,random.order = FALSE, max.words=60)
 
 
@@ -138,9 +134,15 @@ words.positives = unlist(lapply(words, function(x){sum(!is.na(match(x,positive))
 words.negatives = unlist(lapply(words, function(x){sum(!is.na(match(x,negative)))}))
 words.total = unlist(lapply(words, function(x){sum(!is.na(match(x,positive)))  - sum(!is.na(match(x,negative))) } )) 
 
+
+print("Mean of differences from positive and negative words")
 mean(words.total)
+
+print("Total differences from positive and negative words ")
 words.total
+print("Standard Deviation of total differences from positive and negative words ")
 sd(words.total)
+
 
 #PLOTTING THE BARPLOTS of the Sentiment Analysis
 
@@ -169,3 +171,4 @@ ggplot(hfp.df, aes(reorder(names,high.freq), high.freq,  fill = names) ) +
   theme(axis.title.x=element_text(size=10,color="#535353",face="bold",vjust=-.5)) +
   theme(plot.margin = unit(c(1, 1, .5, .7), "cm"))+
   theme(legend.position="none")
+
