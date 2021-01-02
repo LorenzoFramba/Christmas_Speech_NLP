@@ -38,7 +38,7 @@ To make the program run correctly, just go on the project folder, open the termi
 Rscript NLP.R
 ```
 
-All the images will be instantly saved in the folder itself. 
+All the visualization results will be instantly saved in the folder itself. 
 
 
 You also have the option to open RStudio and run it manually, line by line and follow all the comments of the code.
